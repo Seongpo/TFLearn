@@ -19,8 +19,11 @@ imdb = keras.datasets.imdb
 
 # Convert the integers back to words
 # A dictionary mapping words to an integer index
+# 딕셔너리 타입의 단어와 자연수를 매핑 시킨 값을 리턴받아서
 word_index = imdb.get_word_index()
 
+# 0,1,2,3 은 특정단어로 남김. 따라서 모든 단어에 3씩 값을 더해줌. 
+# dictionary.items() 는 딕셔너리의 key, value값을 튜플형태로 돌려줌
 #The first indices are reserved
 word_index = {k:(v+3) for k, v in word_index.items()}
 word_index["<PAD>"] = 0
@@ -28,8 +31,10 @@ word_index["<START>"] = 1
 word_index["<UNK>"] = 2
 word_index["<UNUSED>"] = 3
 
+# 딕셔너리의 key와 value 값을 뒤집어서 새로운 딕셔너리를 만듦
 reverse_word_index = dict([(value, key) for (key, value) in word_index.items()])
 
+# 텍스트 값을 받아서 인덱스의 value 값(integer)을 받아서 스트링으로 변환
 def decode_review(text):
     return ' '.join([reverse_word_index.get(i, '?') for i in text])
 
@@ -88,4 +93,36 @@ print(results)
 
 history_dict = history.history
 history_dict.keys()
-print(dict_keys(['val_acc', 'acc', 'val_loss', 'loss']))
+
+import matplotlib.pyplot as plt
+
+acc = history.history['acc']
+val_acc = history.history['val_acc']
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+
+epochs = range(1, len(acc) + 1)
+
+# "bo" is for "blue dot"
+plt.plot(epochs, loss, 'bo', label='Training loss')
+# b is for "solid blue line"
+plt.plot(epochs, val_loss, 'b', label='Validation loss')
+plt.title('Training and validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+
+plt.show()
+
+plt.clf()   # clear figure
+acc_values = history_dict['acc']
+val_acc_values = history_dict['val_acc']
+
+plt.plot(epochs, acc, 'bo', label='Training acc')
+plt.plot(epochs, val_acc, 'b', label='Validation acc')
+plt.title('Training and validation accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+
+plt.show()
