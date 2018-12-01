@@ -59,6 +59,12 @@ The neural network is created by stacking layers—this requires two main archit
 
 How many layers to use in the model?
 How many hidden units to use for each layer?
+
+임베딩 레이어는 정수로 인코딩된 단어를 취해서 각 워드 인덱싱에 대한 임베딩 벡터를 찾는다. 이 벡터들이 모델 트레인으로
+러닝 된다.  벡터들은 출력 배열에 대한 차원을 더한다. 
+GlobalAveragePooling1D 레이어는 각 예제에 대해 고정길이의 출력 벡터를 리턴한다. 이것이 입력변수길이를 다룰수 있도록 한다.
+고정길이의 출력은 16개의 히든 레이어를 가지는 fully-connected(Dense) 레이어에 연결된다.
+마지막 레이어는 싱글 출력 노드로 연결된다. sigmoid 함수이고 출력은 0과 1 사이의 부동소수 이다. 
 '''
 
 # input shape is the vocabulary count used for the movie reviews(10,000 words)
@@ -72,15 +78,32 @@ model.add(keras.layers.Dense(1, activation=tf.nn.sigmoid))
 
 print(model.summary())
 
+'''
+loss function and optimizer
+loss funciton(cost function) 과 최소값을 찾아가는 방법이 필요함
+여기서는 binary_crossentropy 를 loss funtion으로 AdamOptimizer()를 옵디마이져로 사용함
+
+'''
 model.compile(optimizer=tf.train.AdamOptimizer(),
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
+
+'''
+=== Create a validation set ===
+트레이닝 데이터와 별도로 10000 의 Validation 세트를 마련함
+'''
 x_val = train_data[:10000]
 partial_x_train = train_data[10000:]
 
 y_val = train_labels[:10000]
 partial_y_train = train_labels[10000:]
+
+'''
+=== Train the model ===
+40 epoch와 512 개의 batch 사이즈를 가지는 트레이닝 모델을 만들어서 학습
+미리 만들어둔 10000 개의 validation 데이터를 이용해서 매 epoch 마다 평가
+'''
 
 history = model.fit(partial_x_train,
                     partial_y_train,
@@ -89,10 +112,16 @@ history = model.fit(partial_x_train,
                     validation_data=(x_val, y_val),
                     verbose=1)
 
+# 평가 함수를 통해 트레이닝 된 결과를 평가함
 results = model.evaluate(test_data, test_labels)
-
 print(results)
-
+print(history.history)
+'''
+아래 트레이닝 결과에 대한 그래프
+'''
+# model.fit() returns a History object 
+# that contains a dictionary with everything that happened during training:
+# history.history 는 딕셔너리로서 'val_loss', 'val_acc', 'loss', 'acc' 를 key 로 가진다.
 history_dict = history.history
 history_dict.keys()
 
